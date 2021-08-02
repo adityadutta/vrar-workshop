@@ -1,34 +1,94 @@
 <!DOCTYPE html>
 <html>
-<script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-<!-- we import arjs version without NFT but with marker + location based support -->
-<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 
-<script>
-  AFRAME.registerComponent('anims', {
-        init: function () {
-            this.el.addEventListener('model-loaded', e => {
-                console.log(this.el.components['gltf-model'].model.animations)
-            })
-        }
+<head>
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <!-- we import arjs version without NFT but with marker + location based support -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+
+  <script>
+    AFRAME.registerComponent('anims', {
+      init: function () {
+        this.el.addEventListener('model-loaded', e => {
+          console.log(this.el.components['gltf-model'].model.animations)
+        })
+      }
     });
-
-</script>
+  </script>
+</head>
 
 <body style="margin : 0px; overflow: hidden;">
 
-  <a-scene embedded arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false; emitevents: true; detectionMode: mono; maxDetectionRate: 30;'>
+  <a-scene embedded
+    arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false; emitevents: true; detectionMode: mono; maxDetectionRate: 30;'>
     <a-assets timeout="3000">
-      <a-asset-item id="doge" response-type="arraybuffer"
-          src="models\doge.glb">
+      <a-asset-item id="doggo_model" response-type="arraybuffer" src="models\doge.glb">
       </a-asset-item>
-  </a-assets>
+    </a-assets>
     <a-marker preset="hiro">
-      <a-entity position="0 0 0" scale="1 1 1" rotation="0 0 0" gltf-model="#doge" animation-mixer="clip: standing; loop: repeat; repetitions: Infinity" anims></a-entity>
+      <a-entity id="doggo" position="0 0 0" scale="1 1 1" rotation="0 0 0" gltf-model="#doggo_model"
+        animation-mixer="clip: standing; loop: repeat; repetitions: Infinity" anims></a-entity>
     </a-marker>
     <a-entity camera></a-entity>
   </a-scene>
+
+  <script>
+    let scene = document.querySelector('a-scene');
+    let doggo = document.querySelector('#doggo');
+
+    function playAnimation(animation) {
+      if (doggo === document.querySelector('#doggo')) {
+        //sitting = animation.startsWith('Sit') && animation !== 'Sit_Up';
+        doggo.setAttribute('animation-mixer', { clip: animation });
+        const listener = () => {
+          doggo.setAttribute('animation-mixer', { clip: 'sitting' });
+          doggo.removeEventListener('animation-loop', listener);
+        };
+        doggo.addEventListener('animation-loop', listener);
+      }
+    }
+
+    function tryAgain() {
+      recognition.stop();
+      setTimeout(() => { recognition.start(); });
+    }
+
+    function onCommand(results) {
+      for (const result of results) {
+        for (const { transcript } of Array.from(result)) {
+          console.log(transcript);
+          const animations = {
+            'Stand up': 'standing',
+            'Sit': 'sitting',
+            'Shake': 'shake',
+            'rollover': 'rollover',
+            'Play dead': 'play_dead',
+          };
+          for (const animationKey of Object.keys(animations)) {
+            if (transcript.toLowerCase().includes(animationKey.toLowerCase())) {
+              playAnimation(animations[animationKey]);
+              return;
+            }
+          }
+        }
+      }
+    }
+
+
+    try {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.maxAlternatives = 5;
+      recognition.onresult = ({ results }) => onCommand(results);
+      recognition.onerror = () => setTimeout(tryAgain, 500);
+      recognition.onend = () => recognition.start();
+      recognition.start();
+
+    } catch (err) { console.error(err.message); }
+
+  </script>
 </body>
 
 </html>
