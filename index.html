@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <title>WebAr is Awesome!</title>
   <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
   <!-- we import arjs version without NFT but with marker + location based support -->
@@ -20,7 +21,6 @@
 </head>
 
 <body style="margin : 0px; overflow: hidden;">
-
   <a-scene embedded
     arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false; emitevents: true; detectionMode: mono; maxDetectionRate: 30;'>
     <a-assets timeout="3000">
