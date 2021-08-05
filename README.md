@@ -1,6 +1,6 @@
 # vrar-workshop
 
-##Prerequisite 
+## Prerequisite 
 * Sync to the main branch or download it as a zip.
 * Print out the marker (recommended)
 * Android or iOS device or a webcam
