@@ -3,8 +3,6 @@
 
 <head>
   <title>WebAr is Awesome!</title>
-  <!-- permission to use the microphone -->
-  <uses-permission android:name="android.permission.RECORD_AUDIO" />
   <!-- import aframe -->
   <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
   <!-- we import arjs version without NFT but with marker + location based support -->
@@ -12,101 +10,22 @@
   <!-- import aframe extras -->
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 
-  <script>
-    //helper function to get the name of all animations in a gltf-model
-    AFRAME.registerComponent('anims', {
-      init: function () {
-        this.el.addEventListener('model-loaded', e => {
-          console.log(this.el.components['gltf-model'].model.animations)
-        })
-      }
-    });
-  </script>
+  <!-- helper function to get the name of all animations in a gltf-model -->
+
 </head>
-
-<body style="margin : 0px; overflow: hidden;">
+<body>
   <!-- create the aframe scene -->
-  <a-scene embedded
-    arjs='trackingMethod: best; sourceType: webcam; debugUIEnabled: false; emitevents: true; detectionMode: mono; maxDetectionRate: 30;'>
-    <!-- Load our assets -->
-    <a-assets timeout="3000">
-      <!-- Loading doggo here -->
-      <a-asset-item id="doggo_model" response-type="arraybuffer" src="models\doge.glb">
-      </a-asset-item>
-    </a-assets>
-    <!-- Set the marker we are tracking for, in our case it's "hiro" -->
-    <a-marker preset="hiro">
-      <!-- Place doggo on the marker and set it's position, rotation, scale and starting animation -->
-      <a-entity id="doggo" position="0 0 0" scale="1 1 1" rotation="0 0 0" gltf-model="#doggo_model"
-        animation-mixer="clip: standing; loop: repeat; repetitions: Infinity" anims></a-entity>
-    </a-marker>
-    <!-- the AR camera entity -->
-    <a-entity camera></a-entity>
-  </a-scene>
 
-  <!--This script for voice commands to control doggo and wasn't covered in the workshop-->
-  <script>
-    //store a reference to doggo
-    let doggo = document.querySelector('#doggo');
+  <!-- Load our assets -->
 
-    //plays the animation that is passed
-    function playAnimation(animation) {
-      if (doggo === document.querySelector('#doggo')) {
-        doggo.setAttribute('animation-mixer', { clip: animation });
-        const listener = () => {
-          doggo.setAttribute('animation-mixer', { clip: 'sitting' });
-          doggo.removeEventListener('animation-loop', listener);
-        };
-        doggo.addEventListener('animation-loop', listener);
-      }
-    }
+  <!-- Loading doggo here -->
 
-    //trys to run the speech recognition again
-    function tryAgain() {
-      recognition.stop();
-      setTimeout(() => { recognition.start(); });
-    }
+  <!-- Set the marker we are tracking for, in our case it's "hiro" -->
 
-    //callback when speech is recognized
-    function onCommand(results) {
-      //loop through all our results
-      for (const result of results) {
-        //get the value of the result from the array of results
-        for (const { transcript } of Array.from(result)) {
-          console.log(transcript);
-          //map where key is the command and value is the animation clip 
-          const animations = {
-            'Stand up': 'standing',
-            'Sit': 'sitting',
-            'Shake': 'shake',
-            'rollover': 'rollover',
-            'Play dead': 'play_dead',
-          };
-          //loop through all animation keys
-          for (const animationKey of Object.keys(animations)) {
-            //if animation key matches our command then play that animation
-            if (transcript.toLowerCase().includes(animationKey.toLowerCase())) {
-              playAnimation(animations[animationKey]);
-              return;
-            }
-          }
-        }
-      }
-    }
+  <!-- Place doggo on the marker and set it's position, rotation, scale and starting animation -->
 
-    //initialize speech recognition
-    try {
-      recognition = new webkitSpeechRecognition();
-      recognition.continuous = false;
-      recognition.maxAlternatives = 5;
-      recognition.onresult = ({ results }) => onCommand(results);
-      recognition.onerror = () => setTimeout(tryAgain, 500);
-      recognition.onend = () => recognition.start();
-      recognition.start();
-
-    } catch (err) { console.error(err.message); }
-
-  </script>
+  <!-- the AR camera entity -->
+  
 </body>
 
 </html>
